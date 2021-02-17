@@ -3,42 +3,47 @@
 // <⚠️ /DONT DELETE THIS ⚠️>
 const taskForm = document.querySelector(".form-task"),
   taskInput = taskForm.querySelector(".input-task"),
-  taskList = document.querySelector(".task-list"),
+  pendingList = document.querySelector(".pending-list"),
   finishedList = document.querySelector(".finished-list");
-const Tasks = "MyTask";
-const finishedTasks = "FinishedTask";
-const IdCounts = "Count";
-let tasks_arr = [];
+const Pending = "Pending";
+const Finished = "Finished";
+
+let pendingTasks_arr = [];
 let finishedTasks_arr=[];
-// let id_count = 0;
-function saveTasks(task_status,task_list){
-  localStorage.setItem(task_status,JSON.stringify(task_list));
+
+function saveTasks(){
+  localStorage.setItem(Pending,JSON.stringify(pendingTasks_arr));
+  localStorage.setItem(Finished,JSON.stringify(finishedTasks_arr));
 }
-// function saveCount(){
-//   localStorage.setItem(IdCounts,id_count);
-// }
+
 function deleteTask(task_status,event){
-  const btn = event.target;
-  const li__column = btn.parentNode;
-  const li = li__column.parentNode;
-  if(task_status === Tasks){
-    
-      taskList.removeChild(li);
-      cleanTasks_arr = tasks_arr.filter(function(toDo){
-      return toDo.id !== parseInt(li.id);
-    })
-      tasks_arr = cleanTasks_arr;
-      saveTasks(task_status,tasks_arr);
-  }else if(task_status === finishedTasks){
-      
-      finishedList.removeChild(li);
-      cleanTasks_arr = finishedTasks_arr.filter(function(toDo){
-      return toDo.id !== parseInt(li.id);
-    })
-      
-      finishedTasks_arr = cleanTasks_arr;
-      saveTasks(task_status,finishedTasks_arr);
+  if(!confirm('Do you really want to delete?')){
+    event.preventDefault();
   }
+  else{
+    const btn = event.target;
+    const li__column = btn.parentNode;
+    const li = li__column.parentNode;
+    if(task_status === Pending){
+      
+        pendingList.removeChild(li);
+        cleanTasks_arr = pendingTasks_arr.filter(function(task){
+        return task.id !== li.id;
+      })
+        pendingTasks_arr = cleanTasks_arr;
+        saveTasks();
+    }else if(task_status === Finished){
+        
+        finishedList.removeChild(li);
+        cleanTasks_arr = finishedTasks_arr.filter(function(task){
+        return task.id !== li.id;
+      })
+        
+        finishedTasks_arr = cleanTasks_arr;
+        saveTasks();
+    }
+  }
+  
   
 }
 
@@ -47,71 +52,61 @@ function switchBetweenBoard(task_status,event){
   const li__column = btn.parentNode;
   const li = li__column.parentNode;
   
-  if(task_status === Tasks){
-    taskList.removeChild(li);
-    console.log(li.id)
-    doneTask_arr =  tasks_arr.filter(function(toDo){
-    return toDo.id === parseInt(li.id);
-    })
-    console.log(doneTask_arr);
-    const doneTask_text = doneTask_arr[0].text;
-    const doneTask_id = doneTask_arr[0].id;
-    const taskObj = {
-      text : doneTask_text,
-      id : doneTask_id
-    }
-    finishedTasks_arr.push(taskObj);
-    saveTasks(finishedTasks,finishedTasks_arr);
+  if(task_status === Pending){
+    pendingList.removeChild(li);
     
-    cleanTasks_arr = tasks_arr.filter(function(toDo){
-      return toDo.id !== parseInt(li.id);
+    doneTask_arr =  pendingTasks_arr.find(function(task){
+    return task.id === li.id;
     })
-    tasks_arr = cleanTasks_arr;
-    saveTasks(Tasks,tasks_arr);
-    showTask(doneTask_text,doneTask_id,finishedTasks);
-  }else if(task_status === finishedTasks){
+    
+   
+    finishedTasks_arr.push(doneTask_arr);
+    saveTasks();
+    
+    cleanTasks_arr = pendingTasks_arr.filter(function(task){
+      return task.id !== li.id;
+    })
+    pendingTasks_arr = cleanTasks_arr;
+    saveTasks();
+    showTask(doneTask_arr,Finished);
+  }else if(task_status === Finished){
     finishedList.removeChild(li);
     
-    backTasks_arr =  finishedTasks_arr.filter(function(toDo){
+    backTasks_arr =  finishedTasks_arr.find(function(task){
       
-      return toDo.id === parseInt(li.id);
+      return task.id === li.id;
     })
-    const backTask_text = backTasks_arr[0].text;
-    const backTask_id = backTasks_arr[0].id;
-    const taskObj = {
-      text : backTask_text,
-      id : backTask_id
-    }
-    tasks_arr.push(taskObj);
-    saveTasks(Tasks,tasks_arr);
     
-    cleanTasks_arr = finishedTasks_arr.filter(function(toDo){
-      return toDo.id !== parseInt(li.id);
+    pendingTasks_arr.push(backTasks_arr);
+    saveTasks();
+    
+    cleanTasks_arr = finishedTasks_arr.filter(function(task){
+      return task.id !== li.id;
     })
     finishedTasks_arr = cleanTasks_arr;
-    saveTasks(finishedTasks,finishedTasks_arr);
-    showTask(backTask_text,backTask_id,Tasks);
+    saveTasks();
+    showTask(backTasks_arr,Pending);
   }
   
   
 }
 
-function showTask(task,task_id,task_status) {
-  if(task_status === Tasks){
+function showTask(task,task_status) {
+  if(task_status === Pending){
     const li = document.createElement("li");
     const div__span = document.createElement("div");
     div__span.classList.add("li__column");
     const div__btn = document.createElement("div");
     div__btn.classList.add("li__column");
     const delBtn = document.createElement("button");
-    delBtn.addEventListener("click",deleteTask.bind(null,Tasks));
+    delBtn.addEventListener("click",deleteTask.bind(null,Pending));
     
     const doneBtn = document.createElement("button");
-    doneBtn.addEventListener("click",switchBetweenBoard.bind(null,Tasks));
+    doneBtn.addEventListener("click",switchBetweenBoard.bind(null,Pending));
     delBtn.innerHTML = `<i class="fas fa-trash"></i>`;
     doneBtn.innerHTML = `<i class="fas fa-check "></i>`;
     const span = document.createElement("span");
-    span.innerText = task;
+    span.innerText = task.text;
     
     div__span.appendChild(span);
     div__btn.appendChild(doneBtn);
@@ -119,23 +114,24 @@ function showTask(task,task_id,task_status) {
     
     li.appendChild(div__span);
     li.appendChild(div__btn);
-    taskList.appendChild(li);
-    li.id = task_id;
+    pendingList.appendChild(li);
+    li.id = task.id;
     
-  }else if(task_status === finishedTasks){
+  }else if(task_status === Finished){
+    
     const li = document.createElement("li");
     const div__span = document.createElement("div");
     div__span.classList.add("li__column");
     const div__btn = document.createElement("div");
     div__btn.classList.add("li__column");
     const delBtn = document.createElement("button");
-    delBtn.addEventListener("click",deleteTask.bind(null,finishedTasks));
+    delBtn.addEventListener("click",deleteTask.bind(null,Finished));
     const backBtn = document.createElement("button");
-    backBtn.addEventListener("click",switchBetweenBoard.bind(null,finishedTasks));
+    backBtn.addEventListener("click",switchBetweenBoard.bind(null,Finished));
     delBtn.innerHTML = `<i class="fas fa-trash"></i>`;
     backBtn.innerHTML = `<i class="fas fa-backward"></i>`;
     const span = document.createElement("span");
-    span.innerText = task;
+    span.innerText = task.text;
     
     div__span.appendChild(span);
     div__btn.appendChild(backBtn);
@@ -144,7 +140,7 @@ function showTask(task,task_id,task_status) {
     li.appendChild(div__span);
     li.appendChild(div__btn);
     finishedList.appendChild(li);
-    li.id = task_id;
+    li.id = task.id;
  
 
   }
@@ -156,40 +152,30 @@ function showTask(task,task_id,task_status) {
     const div__btn = document.createElement("div");
     div__btn.classList.add("li__column");
     const delBtn = document.createElement("button");
-    delBtn.addEventListener("click",deleteTask.bind(null,Tasks));
+    delBtn.addEventListener("click",deleteTask.bind(null,Pending));
     
     const doneBtn = document.createElement("button");
-    doneBtn.addEventListener("click",switchBetweenBoard.bind(null,Tasks));
+    doneBtn.addEventListener("click",switchBetweenBoard.bind(null,Pending));
     delBtn.innerHTML = `<i class="fas fa-trash "></i>`;
     doneBtn.innerHTML = `<i class="fas fa-check "></i>`;
     const span = document.createElement("span");
     span.innerText = task;
-    let local_idCount = localStorage.getItem(IdCounts);
-    if(local_idCount !== null){
-      local_idCount = parseInt(local_idCount);
-      
-      local_idCount+=1;
-      
-      localStorage.setItem(IdCounts,local_idCount);
-    }else{
-      localStorage.setItem(IdCounts,1);
-    }
-    // id_count += 1;
-    const newId = localStorage.getItem(IdCounts);
+    
     div__span.appendChild(span);
     div__btn.appendChild(doneBtn);
     div__btn.appendChild(delBtn);
     
     li.appendChild(div__span);
     li.appendChild(div__btn);
-    taskList.appendChild(li);
+    pendingList.appendChild(li);
+    const newId = String(Date.now());
     li.id = newId;
     const taskObj = {
       text : task,
-      id : parseInt(newId)
+      id : newId
     };
-    tasks_arr.push(taskObj);
-    saveTasks(Tasks,tasks_arr);
+    pendingTasks_arr.push(taskObj);
+    saveTasks();
     
   }
 
@@ -202,34 +188,28 @@ function handleSubmit(event) {
   taskInput.value = "";
 }
 function loadTasks() {
-  const loadedTasks = localStorage.getItem(Tasks);
+  const loadedTasks = localStorage.getItem(Pending);
   
   if (loadedTasks !== null) {
       const parsedTasks = JSON.parse(loadedTasks);
-      parsedTasks.forEach(function(toDo){
-        const taskObj = {
-        text: toDo.text,
-        id: toDo.id
-      };
-      tasks_arr.push(taskObj);
-      showTask(toDo.text,toDo.id,Tasks);
+      parsedTasks.forEach(function(task){
+      
+      pendingTasks_arr.push(task);
+      showTask(task,Pending);
     }
     );
       
   }
 }
 function loadFinishedTasks(){
-  const loadedFinishedTasks = localStorage.getItem(finishedTasks);
+  const loadedFinishedTasks = localStorage.getItem(Finished);
  
   if (loadedFinishedTasks !== null) {
       const parsedFinishedTasks = JSON.parse(loadedFinishedTasks);
-      parsedFinishedTasks.forEach(function(toDo){
-        const taskObj = {
-        text: toDo.text,
-        id: toDo.id
-      };
-      finishedTasks_arr.push(taskObj);
-      showTask(toDo.text,toDo.id,finishedTasks);
+      parsedFinishedTasks.forEach(function(task){
+      
+      finishedTasks_arr.push(task);
+      showTask(task,Finished);
     }
     );
   }
