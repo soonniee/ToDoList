@@ -1,11 +1,12 @@
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap");
 body {
   font-family: "Montserrat", sans-serif;
-  width: 50vw;
+  /* width: 50vw; */
   height: 100vh;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
+
   align-items: center;
 }
 h1 {
@@ -16,13 +17,16 @@ h1 {
   margin-bottom: 65px;
 }
 .all-list {
-  width: 70%;
+  width: 100%;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
+}
+.all-list__pending {
+  margin-right: 80px;
 }
 .all-list__pending,
 .all-list__finished {
-  width: 45%;
+  /* width: 50%; */
 }
 h3 {
   opacity: 0.8;
